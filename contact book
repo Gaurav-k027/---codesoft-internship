@@ -1,0 +1,85 @@
+import json
+
+class ContactBook:
+    def __init__(self, filename="contacts.json"):
+        self.filename = filename
+        self.contacts = self.load_contacts()
+
+    def load_contacts(self):
+        try:
+            with open(self.filename, "r") as file:
+                return json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
+
+    def save_contacts(self):
+        with open(self.filename, "w") as file:
+            json.dump(self.contacts, file, indent=4)
+
+    def add_contact(self, name, phone, email, address):
+        self.contacts.append({"name": name, "phone": phone, "email": email, "address": address})
+        self.save_contacts()
+
+    def view_contacts(self):
+        for idx, contact in enumerate(self.contacts, start=1):
+            print(f"{idx}. {contact['name']} - {contact['phone']}")
+
+    def search_contact(self, keyword):
+        return [c for c in self.contacts if keyword.lower() in c['name'].lower() or keyword in c['phone']]
+
+    def update_contact(self, index, name=None, phone=None, email=None, address=None):
+        contact = self.contacts[index]
+        if name: contact['name'] = name
+        if phone: contact['phone'] = phone
+        if email: contact['email'] = email
+        if address: contact['address'] = address
+        self.save_contacts()
+
+    def delete_contact(self, index):
+        self.contacts.pop(index)
+        self.save_contacts()
+
+def main():
+    book = ContactBook()
+
+    while True:
+        print("\n📇 Contact Book Menu")
+        print("1. Add Contact")
+        print("2. View Contacts")
+        print("3. Search Contact")
+        print("4. Update Contact")
+        print("5. Delete Contact")
+        print("6. Exit")
+        choice = input("Choose an option: ")
+
+        if choice == "1":
+            name = input("Name: ")
+            phone = input("Phone: ")
+            email = input("Email: ")
+            address = input("Address: ")
+            book.add_contact(name, phone, email, address)
+        elif choice == "2":
+            book.view_contacts()
+        elif choice == "3":
+            keyword = input("Enter name or phone to search: ")
+            results = book.search_contact(keyword)
+            for r in results:
+                print(f"{r['name']} - {r['phone']}")
+        elif choice == "4":
+            index = int(input("Enter contact index to update: ")) - 1
+            name = input("New name (leave blank to skip): ")
+            phone = input("New phone (leave blank to skip): ")
+            email = input("New email (leave blank to skip): ")
+            address = input("New address (leave blank to skip): ")
+            book.update_contact(index, name, phone, email, address)
+        elif choice == "5":
+            index = int(input("Enter contact index to delete: ")) - 1
+            book.delete_contact(index)
+        elif choice == "6":
+            print("Goodbye 👋")
+            break
+        else:
+            print("Invalid choice. Try again.")
+
+if __name__ == "__main__":
+    main()
